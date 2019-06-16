@@ -1,6 +1,7 @@
-FROM golang:1.11.1-alpine3.8
+FROM golang:1.12.5-alpine3.9
 
 # Add args
+ARG PERSONAL_ACCESS_TOKEN
 ARG APP_NAME=nasi-goreng
 ARG LOG_DIR=/${APP_NAME}/logs
 
@@ -23,10 +24,15 @@ ENV LOG_FILE_LOCATION=${LOG_DIR}/app.log
 
 COPY . $SRC_DIR
 
-RUN apk update && apk add --no-cache $BUILD_PACKAGES \
-  && go mod download \
-  && apk del $BUILD_PACKAGES \
-  && CGO_ENABLED=0 GOOS=linux go build -ldflags '-w -s' -a -o app .
+RUN apk update && apk add --no-cache $BUILD_PACKAGES
+
+RUN chmod +x ./scripts/github_private_repo.sh
+
+RUN ./scripts/github_private_repo.sh $PERSONAL_ACCESS_TOKEN
+
+RUN go mod download \
+  && CGO_ENABLED=0 GOOS=linux go build -ldflags '-w -s' -a -o app . \
+  && apk del $BUILD_PACKAGES
 
 # Copy environment variable to source dir
 #COPY .env $SRC_DIR.env
