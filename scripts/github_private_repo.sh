@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 USERNAME=wuriyanto48
 PERSONAL_ACCESS_TOKEN=$1
